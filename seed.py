@@ -2,7 +2,7 @@
 
 from sqlalchemy import func
 from model import User
-# from model import Rating
+from model import Rating
 from model import Movie
 
 from model import connect_to_db, db
@@ -69,7 +69,14 @@ def load_ratings():
         row = row.rstrip().split()
 
         user_id, movie_id, score, timestamp = row
-        print()
+
+        rating = Rating(user_id=user_id,
+                        movie_id=movie_id,
+                        score=score)
+
+        db.session.add(rating)
+
+    db.session.commit()
 
 
 def set_val_user_id():
@@ -85,6 +92,17 @@ def set_val_user_id():
     db.session.commit()
 
 
+def set_val_movie_id():
+    """Set value for the next movie_id after seeding database"""
+
+    result = db.session.query(func.max(Movie.movie_id)).one()
+    max_id = int(result[0])
+
+    query = "SELECT setval('movies_movie_id_seq', :new_id)"
+    db.session.execute(query, {'new_id': max_id + 1})
+    db.session.commit()
+
+
 if __name__ == "__main__":
     connect_to_db(app)
 
@@ -96,3 +114,4 @@ if __name__ == "__main__":
     load_movies()
     load_ratings()
     set_val_user_id()
+    set_val_movie_id()
