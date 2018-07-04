@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block content %}
+
+  <h2>Registration Form</h2>
+
+  <form action="/register" method='POST'>
+      <label>Enter your email
+          <input type="text" name="email" required>
+      </label>
+      <label>Choose a password
+          <input type="text" name="password" required>
+      </label>
+       
+        <select>
+        {% for i in range(101) %}
+          <option value="{{i}}">{{i}}</option>
+        {% endfor %}
+        </select>
+
+       <label>Enter your zipcode
+          <input type="text" name="zipcode">
+      </label>
+      <input type="submit" value="Become User">
+  </form>
+
+{% endblock %}
