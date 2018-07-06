@@ -3,11 +3,11 @@
 from jinja2 import StrictUndefined
 
 from flask import (Flask, render_template, redirect, request, flash,
-                   session)
+                   session, jsonify)
 
 from flask_debugtoolbar import DebugToolbarExtension
 
-from model import User, Rating, Movie, connect_to_db, connect_to_db
+from model import User, Rating, Movie, connect_to_db, db
 
 app = Flask(__name__)
 
@@ -42,27 +42,82 @@ def show_registration_form():
 
 
 @app.route("/register", methods=["POST"])
-def adds_user_to_db():
+def validates_user():
     """Adds user to db"""
-    email = request.form("email")
-    password = request.form("password")
-    age = request.form("age")
-    zipcode = request.form("zipcode")
+    email = request.form.get("email")
+    password = request.form.get("password")
+    # age = request.form.get("age")
+    # zipcode = request.form.get("zipcode")
 
-    is_user_there = db.session.query(User).filter(User.email=email).all()
+    # is_user_there = User.query.filter(User.email == email).all()
 
-    # if email in is_user_there:
-    #     fails
-    # else:
-    #     add to db/make instance of class
+    is_user_there = db.session.query(User).filter(User.email == email).first()
 
-# check if email in table already
-    # add user to table by instantiating an instance of user class
-    # commit to db
-    # fash message - success, you may now rate movies
-# else return to registration if email is already in db
+    if is_user_there:
+        flash("You're already registered!")
+        return redirect("/login")
+
+    else:
+        new_user = User(email=email, password=password)
+        db.session.add(new_user)
+        db.session.commit()
+
+        flash("Success! You were registered!")
 
     return redirect("/")
+
+
+@app.route("/login")
+def log_in():
+    """Show login form"""
+
+    return render_template("login.html")
+
+
+@app.route("/login", methods=["POST"])
+def verify_credentials():
+    """Vaildating credentials in the database"""
+
+    input_email = request.form.get("email")
+    input_password = request.form.get("password")
+
+    user = User.query.filter_by(email=input_email, password=input_password).first()
+
+    if user:
+        session['user_id'] = jsonify(user)
+        # can't put an object in the session! need to change to dict or pull out things we want
+        #         >>> a = A()
+        # >>> a.__dict__
+        # {'c': 2, 'b': 1}
+        print(session['user_id'])
+
+        flash("Logged In")
+
+        return redirect("/")
+
+    else:
+        flash("Incorrect email and/or password")
+
+        return redirect("/login")
+
+
+@app.route("/logout")
+def logout():
+    """logout"""
+    del session["user_id"]
+    print(session)
+    flash("Logout successful")
+    return redirect("/")
+
+
+@app.route("/user_list")
+def shows_user_ratings():
+    """shows user ratings"""
+
+
+
+    movie_list = [(1, "brown"), (2, "gray"), (3, "red")]
+    return render_template("user_list.html", movie_list=movie_list)
 
 
 if __name__ == "__main__":

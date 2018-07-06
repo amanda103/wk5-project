@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h1>User Information</h1>
+
+
+<h2>{{ session['user_id'].email }}</h2>
+
+<body>
+    {{ session['user_id'].age }}
+    {{ session['user_id'].zipcode }}
+
+    {% for movie_rating in movie_list %}
+    <li>{{ movie_rating[0] }} got a score of: {{ movie_rating[1] }}
+
+    </li>
+    {% endfor %}
+</body>
+
+
+<!-- 
+<p><a href="/movies">View all movies</a></p>
+
+<h2>Users</h2>
+<p><a href="/users">View all users</a></p> -->
+
+{% endblock %}
