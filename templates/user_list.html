@@ -4,11 +4,11 @@
 <h1>User Information</h1>
 
 
-<h2>{{ session['user_id'].email }}</h2>
+<h2>{{ user.email }}</h2>
 
 <body>
-    {{ session['user_id'].age }}
-    {{ session['user_id'].zipcode }}
+    {{ user.age }}
+    {{ user.zipcode}}
 
     {% for movie_rating in movie_list %}
     <li>{{ movie_rating[0] }} got a score of: {{ movie_rating[1] }}

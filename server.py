@@ -84,7 +84,8 @@ def verify_credentials():
     user = User.query.filter_by(email=input_email, password=input_password).first()
 
     if user:
-        session['user_id'] = jsonify(user)
+        session['user_id'] = user.user_id
+        # session['user_email'] = user.email
         # can't put an object in the session! need to change to dict or pull out things we want
         #         >>> a = A()
         # >>> a.__dict__
@@ -93,7 +94,7 @@ def verify_credentials():
 
         flash("Logged In")
 
-        return redirect("/")
+        return redirect("/user_list")
 
     else:
         flash("Incorrect email and/or password")
@@ -114,10 +115,23 @@ def logout():
 def shows_user_ratings():
     """shows user ratings"""
 
+    user_id = session['user_id']
+    user = User.query.filter_by(user_id=user_id).first()
+
+    # movie_list = db.session.query(Rating.movie_id, Rating.score).filter(Rating.user_id == 1).all()
+    # movie_list = db.session.query(Rating.movie, Rating.score).filter(Rating.user_id == 1).all()
+
+    ratings = Rating.query.options(db.joinedload('movie')).filter(Rating.user_id == 1).all()
+
+    print(ratings)
+
+    user_ratings = []
+    for obj in ratings:
+        user_ratings.append([obj.movie.title, obj.score])
 
 
-    movie_list = [(1, "brown"), (2, "gray"), (3, "red")]
-    return render_template("user_list.html", movie_list=movie_list)
+    # movie_list = [(1, "brown"), (2, "gray"), (3, "red")]
+    return render_template("user_list.html", movie_list=user_ratings, user=user)
 
 
 if __name__ == "__main__":
